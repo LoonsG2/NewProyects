@@ -1,18 +1,16 @@
 {
   "name": "hotel-reservation-frontend",
   "version": "1.0.0",
-  "description": "Frontend for Hotel Reservation System",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest",
+    "preview": "vite preview --port 4173",
+    "test": "vitest run",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint . --ext js,jsx --fix",
-    "preview:prod": "vite preview --port 4173"
+    "lint:fix": "eslint . --ext js,jsx --fix"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -33,10 +31,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "vite": "^4.4.5",
-    "vitest": "^0.34.0",
-    "jsdom": "^22.1.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/user-event": "^14.4.3"
+    "vitest": "^0.34.0"
   }
 }

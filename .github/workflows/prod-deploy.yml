@@ -47,7 +47,7 @@ jobs:
       run: |
         cd frontend
         npm install
-        npm test -- --watchAll=false --coverage
+        npm test
         npm run lint
         npm run build
     
@@ -79,16 +79,6 @@ jobs:
           ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}
           ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.ref_name }}
           ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:latest
-
-    - name: Build and push database image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./database
-        file: ./database/Dockerfile
-        push: true
-        tags: |
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/database:prod-${{ github.sha }}
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/database:prod-${{ github.ref_name }}
 
   deploy-prod:
     name: Deploy to Production

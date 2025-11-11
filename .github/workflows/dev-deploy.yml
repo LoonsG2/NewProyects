@@ -60,7 +60,7 @@ jobs:
     - name: Run frontend tests
       run: |
         cd frontend
-        npm test -- --watchAll=false --coverage
+        npm test
 
     - name: Run frontend linting
       run: |
@@ -107,16 +107,6 @@ jobs:
         tags: |
           ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:dev-${{ github.sha }}
           ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:dev-latest
-
-    - name: Build and push database image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./database
-        file: ./database/Dockerfile
-        push: true
-        tags: |
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/database:dev-${{ github.sha }}
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/database:dev-latest
 
   deploy-dev:
     name: Deploy to Development
