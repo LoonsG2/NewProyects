@@ -5,135 +5,135 @@ on:
     types: [published]
 
 env:
-  NODE_VERSION: '18.x'
+  NODE_VERSION: "18.x"
   DOCKER_REGISTRY: ghcr.io
 
 jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Run security audit
-      run: |
-        cd backend && npm audit
-        cd ../frontend && npm audit
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run security audit
+        run: |
+          cd backend && npm audit
+          cd ../frontend && npm audit
 
   test-and-build:
     name: Test and Build
     runs-on: ubuntu-latest
     needs: security-scan
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-    
-    - name: Install and test backend
-      run: |
-        cd backend
-        npm install
-        npm test
-        npm run lint
-    
-    - name: Install and test frontend
-      run: |
-        cd frontend
-        npm install
-        npm test
-        npm run lint
-        npm run build
-    
-    - name: Log in to Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.DOCKER_REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Build and push backend image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./backend
-        file: ./backend/Dockerfile
-        push: true
-        tags: |
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.sha }}
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.ref_name }}
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:latest
-    
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./frontend
-        file: ./frontend/Dockerfile
-        push: true
-        tags: |
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.ref_name }}
-          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:latest
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install and test backend
+        run: |
+          cd backend
+          npm install
+          npm test
+          npm run lint
+
+      - name: Install and test frontend
+        run: |
+          cd frontend
+          npm install
+          npm test
+          npm run lint
+          npm run build
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.ref_name }}
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.ref_name }}
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:latest
 
   deploy-prod:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: test-and-build
     environment: production
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    
-    - name: Terraform Init
-      run: |
-        cd terraform/prod
-        terraform init -backend-config="bucket=${{ secrets.PROD_TERRAFORM_BUCKET }}"
-    
-    - name: Terraform Plan
-      run: |
-        cd terraform/prod
-        terraform plan -var="backend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.sha }}" -var="frontend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}"
-    
-    - name: Terraform Apply
-      run: |
-        cd terraform/prod
-        terraform apply -auto-approve -var="backend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.sha }}" -var="frontend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: |
+          cd terraform/prod
+          terraform init -backend-config="bucket=${{ secrets.PROD_TERRAFORM_BUCKET }}"
+
+      - name: Terraform Plan
+        run: |
+          cd terraform/prod
+          terraform plan -var="backend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.sha }}" -var="frontend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}"
+
+      - name: Terraform Apply
+        run: |
+          cd terraform/prod
+          terraform apply -auto-approve -var="backend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:prod-${{ github.sha }}" -var="frontend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:prod-${{ github.sha }}"
 
   post-deploy-checks:
     name: Post-Deploy Checks
     runs-on: ubuntu-latest
     needs: deploy-prod
     environment: production
-    
+
     steps:
-    - name: Wait for deployment
-      run: sleep 120
-    
-    - name: Health check API
-      run: |
-        curl -f https://${{ vars.PROD_API_URL }}/api/health || exit 1
-    
-    - name: Health check frontend
-      run: |
-        curl -f https://${{ vars.PROD_FRONTEND_URL }} || exit 1
-    
-    - name: Run smoke tests
-      run: |
-        curl -f https://${{ vars.PROD_API_URL }}/api/rooms || exit 1
-        curl -f https://${{ vars.PROD_API_URL }}/api/reservations || exit 1
+      - name: Wait for deployment
+        run: sleep 120
+
+      - name: Health check API
+        run: |
+          curl -f https://${{ vars.PROD_API_URL }}/api/health || exit 1
+
+      - name: Health check frontend
+        run: |
+          curl -f https://${{ vars.PROD_FRONTEND_URL }} || exit 1
+
+      - name: Run smoke tests
+        run: |
+          curl -f https://${{ vars.PROD_API_URL }}/api/rooms || exit 1
+          curl -f https://${{ vars.PROD_API_URL }}/api/reservations || exit 1
