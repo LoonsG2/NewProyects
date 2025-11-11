@@ -1,0 +1,57 @@
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "prod"
+}
+
+variable "frontend_image" {
+  description = "Frontend Docker image URL"
+  type        = string
+}
+
+variable "backend_image" {
+  description = "Backend Docker image URL"
+  type        = string
+}
+
+variable "database_username" {
+  description = "Database master username"
+  type        = string
+  default     = "hoteladmin"
+}
+
+variable "database_password" {
+  description = "Database master password"
+  type        = string
+  sensitive   = true
+}
+
+variable "jwt_secret" {
+  description = "JWT secret for authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "domain_name" {
+  description = "Domain name for the application"
+  type        = string
+  default     = "hotel.example.com"
+}
+
+variable "create_route53_zone" {
+  description = "Whether to create Route53 zone"
+  type        = bool
+  default     = false
+}
+
+variable "sns_topic_arn" {
+  description = "SNS topic ARN for CloudWatch alarms"
+  type        = string
+  default     = ""
+}

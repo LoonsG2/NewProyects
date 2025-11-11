@@ -1,0 +1,13 @@
+aws_region = "us-east-1"
+environment = "dev"
+
+frontend_image = "ghcr.io/your-username/hotel-reservations/frontend:dev-latest"
+backend_image = "ghcr.io/your-username/hotel-reservations/backend:dev-latest"
+
+database_username = "hoteladmin"
+database_password = "change-me-please"
+
+jwt_secret = "your-super-secret-jwt-key-here"
+
+domain_name = "hotel-dev.yourdomain.com"
+create_route53_zone = false

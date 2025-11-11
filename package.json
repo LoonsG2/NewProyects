@@ -1,0 +1,68 @@
+{
+  "name": "hotel-reservation-system",
+  "version": "1.0.0",
+  "description": "Full-stack hotel reservation system with CI/CD pipeline",
+  "scripts": {
+    "dev": "docker-compose -f docker-compose.dev.yml up",
+    "dev:build": "docker-compose -f docker-compose.dev.yml build",
+    "dev:down": "docker-compose -f docker-compose.dev.yml down",
+    "dev:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+    "prod": "docker-compose -f docker-compose.prod.yml up",
+    "prod:build": "docker-compose -f docker-compose.prod.yml build",
+    "prod:down": "docker-compose -f docker-compose.prod.yml down",
+    "prod:logs": "docker-compose -f docker-compose.prod.yml logs -f",
+    "init:dev": "docker-compose -f docker-compose.dev.yml --profile init up database-init",
+    "init:prod": "docker-compose -f docker-compose.prod.yml --profile init up database-init",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:all": "npm run test:backend && npm run test:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:all": "npm run lint:backend && npm run lint:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:all": "npm run build:backend && npm run build:frontend",
+    "terraform:dev:init": "cd terraform/dev && terraform init",
+    "terraform:dev:plan": "cd terraform/dev && terraform plan",
+    "terraform:dev:apply": "cd terraform/dev && terraform apply -auto-approve",
+    "terraform:dev:destroy": "cd terraform/dev && terraform destroy -auto-approve",
+    "terraform:prod:init": "cd terraform/prod && terraform init",
+    "terraform:prod:plan": "cd terraform/prod && terraform plan",
+    "terraform:prod:apply": "cd terraform/prod && terraform apply -auto-approve",
+    "terraform:prod:destroy": "cd terraform/prod && terraform destroy -auto-approve"
+  },
+  "keywords": [
+    "hotel",
+    "reservation",
+    "booking",
+    "react",
+    "nodejs",
+    "mongodb",
+    "terraform",
+    "docker",
+    "ci-cd"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.jsx": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  }
+}

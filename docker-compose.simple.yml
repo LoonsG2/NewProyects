@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: hotel-mongodb-dev
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: hotel_reservations
+
+  backend:
+    image: node:18-alpine
+    container_name: hotel-backend-dev
+    working_dir: /app
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/hotel_reservations
+      JWT_SECRET: dev-jwt-secret-2024
+    volumes:
+      - ./backend:/app
+    command: sh -c "npm install && node server.js"
+    depends_on:
+      - mongodb
+
+  frontend:
+    image: node:18-alpine  
+    container_name: hotel-frontend-dev
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:3001
+      VITE_NODE_ENV: development
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - backend

@@ -1,0 +1,15 @@
+aws_region = "us-east-1"
+environment = "prod"
+
+frontend_image = "ghcr.io/your-username/hotel-reservations/frontend:prod-latest"
+backend_image = "ghcr.io/your-username/hotel-reservations/backend:prod-latest"
+
+database_username = "hoteladmin"
+database_password = "change-me-please"
+
+jwt_secret = "your-super-secret-jwt-key-here"
+
+domain_name = "hotel.yourdomain.com"
+create_route53_zone = true
+
+sns_topic_arn = "arn:aws:sns:us-east-1:123456789012:alerts-topic"

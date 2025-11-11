@@ -1,0 +1,172 @@
+name: Development Deploy
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+env:
+  NODE_VERSION: '18.x'
+  DOCKER_REGISTRY: ghcr.io
+
+jobs:
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm install
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        npm test
+
+    - name: Run backend linting
+      run: |
+        cd backend
+        npm run lint
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm install
+    
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm test -- --watchAll=false --coverage
+
+    - name: Run frontend linting
+      run: |
+        cd frontend
+        npm run lint
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push backend image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: true
+        tags: |
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:dev-${{ github.sha }}
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:dev-latest
+    
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: true
+        tags: |
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:dev-${{ github.sha }}
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:dev-latest
+
+    - name: Build and push database image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./database
+        file: ./database/Dockerfile
+        push: true
+        tags: |
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/database:dev-${{ github.sha }}
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/database:dev-latest
+
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: development
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Terraform Init
+      run: |
+        cd terraform/dev
+        terraform init
+    
+    - name: Terraform Plan
+      run: |
+        cd terraform/dev
+        terraform plan -var="backend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:dev-${{ github.sha }}" -var="frontend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:dev-${{ github.sha }}"
+    
+    - name: Terraform Apply
+      run: |
+        cd terraform/dev
+        terraform apply -auto-approve -var="backend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/backend:dev-${{ github.sha }}" -var="frontend_image=${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/frontend:dev-${{ github.sha }}"
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    environment: development
+    
+    steps:
+    - name: Wait for deployment
+      run: sleep 60
+    
+    - name: Run API tests
+      run: |
+        curl -f http://${{ vars.DEV_API_URL }}/api/health || exit 1
+    
+    - name: Run frontend tests
+      run: |
+        curl -f http://${{ vars.DEV_FRONTEND_URL }} || exit 1

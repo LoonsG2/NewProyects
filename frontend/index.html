@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/hotel-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Luxury Hotel Reservation System - Book your perfect stay with us">
+    <title>Grand Luxe Hotel - Luxury Stays & Reservations</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Grand Luxe Hotel - Luxury Stays">
+    <meta property="og:description" content="Book your perfect luxury stay with our premium hotel reservation system">
+    <meta property="og:type" content="website">
+    
+    <!-- Theme color for mobile browsers -->
+    <meta name="theme-color" content="#1e40af">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/hotel-icon-180.png">
+    
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="/manifest.json">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Loading indicator -->
+    <div id="loading-indicator" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.3s;
+    ">
+      <div style="text-align: center;">
+        <div style="
+          width: 50px;
+          height: 50px;
+          border: 3px solid #f3f4f6;
+          border-top: 3px solid #1e40af;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 20px;
+        "></div>
+        <p style="color: #374151; font-family: Inter, sans-serif;">Loading Grand Luxe Hotel...</p>
+      </div>
+    </div>
+
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+
+    <script>
+      // Hide loading indicator when app loads
+      window.addEventListener('load', function() {
+        setTimeout(() => {
+          const loader = document.getElementById('loading-indicator');
+          if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 300);
+          }
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>

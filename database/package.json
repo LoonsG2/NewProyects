@@ -1,0 +1,26 @@
+{
+  "name": "hotel-database-init",
+  "version": "1.0.0",
+  "description": "Database initialization scripts for Hotel Reservation System",
+  "main": "init.js",
+  "scripts": {
+    "init": "node init.js",
+    "init:docker": "docker run --network host -e MONGODB_URI=mongodb://localhost:27017/hotel_reservations hotel-database-init",
+    "test": "node -e \"require('./init.js').initializeDatabase().then(() => process.exit(0)).catch(() => process.exit(1))\"",
+    "seed": "node init.js",
+    "mongo:init": "mongosh --file mongo-init.js"
+  },
+  "dependencies": {
+    "mongoose": "^7.5.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "mongosh": "^1.10.0"
+  },
+  "keywords": [
+    "mongodb",
+    "database",
+    "hotel",
+    "reservation"
+  ]
+}
